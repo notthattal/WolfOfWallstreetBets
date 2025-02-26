@@ -9,11 +9,37 @@ st.write("Your own personalized stock predictor")
 st.write("")
 st.write("")
 
+# Add custom CSS to style only the remove buttons
+st.markdown("""
+<style>
+section[data-testid="stSidebar"] button {
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: #999 !important;
+    font-size: 14px !important;
+    padding: 0px !important;
+    width: auto !important;
+    height: auto !important;
+    min-height: 0px !important;
+}
+section[data-testid="stSidebar"] button:hover {
+    background-color: transparent !important;
+    color: #ff0000 !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
 st.sidebar.header("Portfolio")
 
 # Initialize portfolio in session state if not already created
 if "portfolio" not in st.session_state:
     st.session_state.portfolio = {}
+
+# Add a function to remove a stock from the portfolio
+def remove_stock(ticker):
+    if ticker in st.session_state.portfolio:
+        del st.session_state.portfolio[ticker]
 
 # Add an input field
 st.write("Let us know what you have in your portfolio: ")
@@ -47,9 +73,24 @@ if generate_clicked:
     portfolio = ", ".join(portfolio)
     response = get_stock_predictions(portfolio)
 
-    st.subheader("Investment Reccomendations:")
+    st.subheader("Investment Recommendations:")
     st.write(response)
 
 if st.session_state.portfolio:
-    for tick, num_shares in st.session_state.portfolio.items():
-        st.sidebar.write(f"Stock: **{tick}** Shares: **{num_shares}**")
+    for tick, num_shares in list(st.session_state.portfolio.items()):
+        # Use very small columns to position items side by side
+        cols = st.sidebar.columns([15, 1])
+        
+        # Stock info in first column
+        with cols[0]:
+            st.write(f"**{tick}**: {num_shares} share{'s' if num_shares > 1 else ''}")
+        
+        # Remove button in second column (very small)
+        with cols[1]:
+            if st.button("×", key=f"remove_{tick}"):
+                remove_stock(tick)
+                st.rerun()
+    
+    print(st.session_state.portfolio)
+else:
+    st.sidebar.write("Your portfolio is empty.")
