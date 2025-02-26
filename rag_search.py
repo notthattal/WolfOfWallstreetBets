@@ -84,7 +84,7 @@ def cosine_similarity(vec1, vec2):
     '''
     return 1 - cosine(vec1, vec2)
 
-def get_todays_stock_insights(pinecone_index):
+def get_todays_stock_insights(pinecone_index, openai_client):
     '''
     Creates the user prompt (i.e. query) to be passed into the specified LLM
 
@@ -101,7 +101,7 @@ def get_todays_stock_insights(pinecone_index):
     query = f"Date: {today} stocks trading buy sell hold"
 
     # embed the query prompt
-    query_vector = get_embedding(query)
+    query_vector = get_embedding(openai_client, query)
     
     # get all vectors from the database to calculate cosine similarity
     vector_ids = list(pinecone_index.list())[0]
@@ -169,7 +169,7 @@ def get_stock_predictions(portfolio):
     index = pc.Index("wsb-index")
 
     # create query, calculate cosine similarity and get user prompt to feed into the LLM
-    query_results = get_todays_stock_insights(index)
+    query_results = get_todays_stock_insights(index, client)
 
     # generate response from GPT
     response = client.chat.completions.create(
