@@ -113,7 +113,7 @@ def get_todays_stock_insights(pinecone_index, openai_client):
     results = []
     for id in all_vectors:
         vector_data = all_vectors[id]
-        similarity = 1 - cosine(query_vector, vector_data["values"])
+        similarity = cosine_similarity(query_vector, vector_data["values"])
         results.append((id, similarity, vector_data["metadata"]))
     
     # get the top 10 results from our calculated cosine similarity
